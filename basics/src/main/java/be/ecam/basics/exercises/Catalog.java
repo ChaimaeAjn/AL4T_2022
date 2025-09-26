@@ -8,8 +8,8 @@ public class Catalog {
         private final List<String> tags;
 
         public Product(String name, List<String> tags) {
-            this.name = name;
-            this.tags = tags;
+            this.name = (name != null) ? name : "";
+            this.tags = (tags != null) ? tags : List.of();
         }
 
         public String getName() { return name; }
