@@ -1,13 +1,12 @@
 package manager;
 
+import java.awt.Graphics2D;
+import java.awt.Point;
+
 import model.hero.Mario;
 import view.IImageLoader;
 import view.ImageLoader;
-import view.StartScreenSelection;
 import view.UIManager;
-
-import javax.swing.*;
-import java.awt.*;
 
 public class GameEngine implements Runnable {
 
@@ -21,6 +20,7 @@ public class GameEngine implements Runnable {
     public CameraInterface camera;
     private IImageLoader imageLoader;
     private Thread thread;
+    
 
     private GameEngine(CameraInterface camera, IImageLoader imageLoader, ISoundManager soundManager, IMapManager mapManager) {
         this.imageLoader = imageLoader;
@@ -42,6 +42,10 @@ public class GameEngine implements Runnable {
         thread = new Thread(this);
         thread.start();
     }
+    public ISoundManager getSoundManager() {
+    return soundManager;
+    }
+
 
     public void reset(){
         resetCamera();
@@ -50,19 +54,17 @@ public class GameEngine implements Runnable {
 
     public void resetCamera(){
         camera = new Camera();
-        soundManager.restartBackground();
     }
 
     public void createMap(String path) {
         boolean loaded = mapManager.createMap(imageLoader, path);
         if(loaded){
             setGameStatus(GameStatus.RUNNING);
-            soundManager.restartBackground();
-        }
-
-        else
-            setGameStatus(GameStatus.START_SCREEN);
-    }
+            soundManager.restartBackground(); // Déplacer en dehors du if
+            }
+            else
+                setGameStatus(GameStatus.START_SCREEN);
+            }
 
     @Override
     public void run() {
@@ -107,6 +109,7 @@ public class GameEngine implements Runnable {
 
         if (isGameOver()) {
             setGameStatus(GameStatus.GAME_OVER);
+            soundManager.pauseBackground();
         }
 
         int missionPassed = passMission();
@@ -158,7 +161,8 @@ public class GameEngine implements Runnable {
     }
 
     private boolean isGameOver() {
-        if(gameStatus == GameStatus.RUNNING)
+        // Only check game over condition when the game is running.
+        if (gameStatus == GameStatus.RUNNING) 
             return mapManager.isGameOver();
         return false;
     }

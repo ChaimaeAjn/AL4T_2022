@@ -1,10 +1,11 @@
 package manager;
 
+import java.io.BufferedInputStream;
+import java.io.InputStream;
+
 import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.Clip;
-import java.io.BufferedInputStream;
-import java.io.InputStream;
 
 public class SoundManager implements ISoundManager {
 
@@ -13,6 +14,9 @@ public class SoundManager implements ISoundManager {
 
     public SoundManager() {
         background = getClip(loadAudio("background"));
+        if (background != null) {
+            background.loop(Clip.LOOP_CONTINUOUSLY); // Ajouter cette ligne
+    }
     }
 
     private AudioInputStream loadAudio(String url) {
@@ -28,6 +32,14 @@ public class SoundManager implements ISoundManager {
         return null;
     }
 
+    public void stopBackground() {
+        background.stop();
+        background.flush();
+        background.setFramePosition(0);
+        clipTime = 0;
+    }
+
+
     private Clip getClip(AudioInputStream stream) {
         try {
             Clip clip = AudioSystem.getClip();
@@ -42,8 +54,10 @@ public class SoundManager implements ISoundManager {
 
     @Override
     public void resumeBackground(){
-        background.setMicrosecondPosition(clipTime);
-        background.start();
+        if (background != null) {
+            background.setMicrosecondPosition(clipTime);
+            background.loop(Clip.LOOP_CONTINUOUSLY); // Changer start() en loop()
+    }
     }
 
     @Override
@@ -54,8 +68,12 @@ public class SoundManager implements ISoundManager {
 
     @Override
     public void restartBackground() {
-        clipTime = 0;
-        resumeBackground();
+        if (background != null) {
+            background.stop();
+            background.setFramePosition(0);
+            clipTime = 0;
+            background.loop(Clip.LOOP_CONTINUOUSLY); // Changer start() en loop()
+        }
     }
 
     @Override
@@ -81,6 +99,7 @@ public class SoundManager implements ISoundManager {
 
     @Override
     public void playGameOver() {
+        stopBackground();
         Clip clip = getClip(loadAudio("gameOver"));
         clip.start();
 
@@ -110,7 +129,7 @@ public class SoundManager implements ISoundManager {
 
     @Override
     public void playMarioDies() {
-
+        stopBackground();
         Clip clip = getClip(loadAudio("marioDies"));
         clip.start();
 

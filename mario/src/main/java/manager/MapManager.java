@@ -11,6 +11,8 @@ import model.prize.BoostItem;
 import model.prize.Coin;
 import model.prize.Prize;
 import view.IImageLoader;
+import manager.GameStatus;
+
 
 import java.awt.*;
 import java.util.ArrayList;
@@ -215,10 +217,26 @@ public class MapManager implements IMapManager {
             mario.setX(engine.getCameraLocation().getX());
         }
 
-        if(marioDies) {
-            resetCurrentMap(engine);
+        if (marioDies) {
+
+            if (getMario().getRemainingLives() > 0) {
+                engine.playMarioDies(); // Ajouter cette ligne pour jouer le son de mort
+
+                    if (getMario().getRemainingLives() > 0) {
+                        // La musique est déjà arrêtée dans playMarioDies()
+                        resetCurrentMap(engine);
+                    }
+                }
+            else {
+
+                engine.setGameStatus(GameStatus.GAME_OVER);
+                engine.getSoundManager().playGameOver();
+            }
         }
-    }
+
+}
+
+    
 
     private void checkEnemyCollisions() {
         ArrayList<Brick> bricks = map.getAllBricks();
